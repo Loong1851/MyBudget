@@ -27,7 +27,12 @@ public static class BudgetRules
     public static decimal ValidateAmount(decimal amount)
     {
         // TODO: guard clauses + decimal.Round(amount, 2)
-        throw new NotImplementedException();
+        if (amount <= MaxAmount && amount > 0)
+        {
+            return Math.Round(amount, 2);
+        } 
+        throw new InvalidExpenseException("Your amount is not right");
+
     }
 
     /// <summary>
@@ -38,8 +43,19 @@ public static class BudgetRules
     /// </summary>
     public static string ClassifyAmount(decimal amount)
     {
-        // TODO
-        throw new NotImplementedException();
+        if (amount <= 0)
+        {
+            throw new InvalidExpenseException("amount is not right");
+        }
+
+        string result = amount switch
+        {
+            < 10 => "Micro",
+            < 50 => "Small",
+            < 200 => "Medium",
+            _ => "Large",
+        };
+        return result;
     }
 
     /// <summary>
@@ -51,8 +67,23 @@ public static class BudgetRules
     /// </summary>
     public static string? NormalizeCategory(string? input)
     {
-        // TODO
-        throw new NotImplementedException();
+        var data = (input ?? "nothing").ToLower().Trim();
+        string? result = data switch
+        {
+            "food" => "Food",
+            "f" => "Food",
+            "transport" => "Transport",
+            "t" => "Transport",
+            "utilities" => "Utilities",
+            "u" => "Utilities",
+            "entertainment" => "Entertainment",
+            "e" => "Entertainment",
+            "other" => "Other",
+            "o" => "Other",
+            _ => null,
+
+        };
+        return result;
     }
 
     /// <summary>
@@ -62,8 +93,24 @@ public static class BudgetRules
     /// </summary>
     public static string BudgetStatus(decimal remaining, decimal monthlyLimit)
     {
-        // TODO
-        throw new NotImplementedException();
+        if (monthlyLimit <= 0)
+        {
+            throw new InvalidExpenseException("monthlyLimit is not negative");
+        }
+        if (remaining < 0)
+        {
+            return "OVER BUDGET";
+        }
+        else if (remaining < monthlyLimit * NearLimitFraction)
+        {
+            return "Almost out";
+        }
+        else
+        {
+            return "On track";
+        }
+
+
     }
 
     /// <summary>
@@ -73,7 +120,8 @@ public static class BudgetRules
     public static string FormatCurrency(decimal amount)
     {
         // TODO: return FormatCurrency(amount, "$");
-        throw new NotImplementedException();
+        string result = $"${amount:F2}";
+        return result;
     }
 
     /// <summary>
@@ -81,8 +129,8 @@ public static class BudgetRules
     /// </summary>
     public static string FormatCurrency(decimal amount, string currencySymbol)
     {
-        // TODO: use a "0.00" format string
-        throw new NotImplementedException();
+        string result = $"{currencySymbol}{amount:F2}";
+        return result;  
     }
 }
 
