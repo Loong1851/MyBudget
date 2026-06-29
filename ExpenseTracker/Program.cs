@@ -32,8 +32,8 @@ namespace MyBudget
 {
     class Program
     {
-        static List<Expense> expenses = new List<Expense>();
-        static double monthlyBudget = 0;
+
+        static decimal monthlyBudget = 0;
 
         static void Main(string[] args)
         {
@@ -42,8 +42,8 @@ namespace MyBudget
             Console.WriteLine("============================================================");
 
             bool exit = false;
-            
-;
+
+            ;
             while (!exit)
             {
                 Console.WriteLine();
@@ -88,7 +88,6 @@ namespace MyBudget
                 while (true)
                 {
                     description = Console.ReadLine() ?? "";
-
                     if (!string.IsNullOrEmpty(description))
                         break;
 
@@ -96,11 +95,9 @@ namespace MyBudget
                 }
 
                 decimal amount = 0;
-
                 while (true)
                 {
                     Console.Write("Amount      : ");
-
                     if (!decimal.TryParse(Console.ReadLine(), out amount))
                     {
                         Console.WriteLine("Invalid number. Please input again!");
@@ -110,13 +107,12 @@ namespace MyBudget
                     try
                     {
                         var formalAmout = BudgetRules.ValidateAmount(amount);
-                    } catch(Exception e)
+                    }
+                    catch (Exception e)
                     {
                         Console.WriteLine(e);
                         throw;
                     }
-
-
                     break;
                 }
 
@@ -125,17 +121,14 @@ namespace MyBudget
                 while (true)
                 {
                     Console.Write("Category    : [Food/Transport/Utilities/Entertainment/Other] ");
+                    
 
-                    category = Console.ReadLine() ?? "";
+                    category = BudgetRules.NormalizeCategory(Console.ReadLine());
 
-                    if (BudgetRules.ValidCategories.Contains(category,
-                        StringComparer.OrdinalIgnoreCase))
-                    {
-                        category = CultureInfo.CurrentCulture.TextInfo
-                            .ToTitleCase(category.ToLower());
+                    if (!string.IsNullOrEmpty(category))
 
-                        break;
-                    }
+                      break;
+                    
 
                     Console.WriteLine("  Invalid category.");
                 }
@@ -148,7 +141,7 @@ namespace MyBudget
 
                     string input = Console.ReadLine() ?? "";
 
-                    if (string.IsNullOrWhiteSpace(input))
+                    if (string.IsNullOrEmpty(input))
                     {
                         date = DateTime.Today;
                         break;
@@ -172,26 +165,31 @@ namespace MyBudget
 
                 string? note = Console.ReadLine();
 
-                if (string.IsNullOrWhiteSpace(note))
+                if (string.IsNullOrEmpty(note))
                     note = null;
 
-                Expense expense = new Expense
-                {
-                    Description = description,
-                    Amount = amount,
-                    Category = category,
-                    Date = date,
-                    Note = note
-                };
+                //Expense expense = new Expense
+                //{
+                //    Description = description,
+                //    Amount = amount,
+                //    Category = category,
+                //    Date = date,
+                //    Note = note
+                //};
 
-                expenses.Add(expense);
+                //expenses.Add(expense);
 
-                Console.WriteLine($"  Recorded: ${amount:F2} | {category} | {date:yyyy-MM-dd}");
-                Console.WriteLine($"    Size band : {BudgetRules.ClassifyAmount(amount)}");
+                Console.WriteLine($"Recorded  : ${amount:F2} | {category} | {date:yyyy-MM-dd}");
+                Console.WriteLine($"Size band : {BudgetRules.ClassifyAmount(amount)}");
 
                 if (monthlyBudget > 0)
                 {
-                    ShowBudgetStatus();
+                    decimal left = monthlyBudget - amount;
+                    Console.WriteLine(
+                    $"Budget: {BudgetRules.FormatCurrency(left)} remaining of {BudgetRules.FormatCurrency(monthlyBudget)} -> {BudgetRules.BudgetStatus(left, monthlyBudget)}");
+                } else
+                {
+                    Console.WriteLine("Please set your monthly budget first");
                 }
             }
 
@@ -279,10 +277,10 @@ namespace MyBudget
             public string? Note { get; set; }
         }
 
-        
-        
-            public static readonly string[] ValidCategories =
-            {
+
+
+        public static readonly string[] ValidCategories =
+        {
             "Food",
             "Transport",
             "Utilities",
@@ -290,29 +288,30 @@ namespace MyBudget
             "Other"
         };
 
-            public static string ClassifyAmount(double amount)
-            {
-                if (amount < 20)
-                    return "Small";
+        public static string ClassifyAmount(double amount)
+        {
+            if (amount < 20)
+                return "Small";
 
-                if (amount < 100)
-                    return "Medium";
+            if (amount < 100)
+                return "Medium";
 
-                return "Large";
-            }
+            return "Large";
+        }
 
-            public static string BudgetStatus(double budget, double spent)
-            {
-                if (spent > budget)
-                    return "Over budget";
+        public static string BudgetStatus(double budget, double spent)
+        {
+            if (spent > budget)
+                return "Over budget";
 
-                double remaining = budget - spent;
+            double remaining = budget - spent;
 
-                if (remaining < budget * 0.10)
-                    return "Almost out";
+            if (remaining < budget * 0.10)
+                return "Almost out";
 
-                return "On track";
-            }
-        } } 
+            return "On track";
+        }
+    }
+}
 
 // Delete the line above and implement the application here.
